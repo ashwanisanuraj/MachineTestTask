@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "610260807276",
+    "project_id": "assignment-74611",
+    "storage_bucket": "assignment-74611.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:610260807276:android:1cb527941d363f5a34f249",
+        "android_client_info": {
+          "package_name": "com.xero.machinetesttask"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDqyWdvhYlKAB20P85G6shJ28NgtxwjZPU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
