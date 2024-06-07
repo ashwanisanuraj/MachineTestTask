@@ -39,8 +39,8 @@ class OtpVerificationActivity : AppCompatActivity() {
     private lateinit var buttonVerifyOtp: Button
     private lateinit var progressBar: ProgressBar
 
-    private var resendCountdown: Long = 60000 // 60 seconds countdown
-    private val countdownInterval: Long = 1000 // 1 second interval
+    private var resendCountdown: Long = 60000
+    private val countdownInterval: Long = 1000
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,7 +51,6 @@ class OtpVerificationActivity : AppCompatActivity() {
         textViewResendOtp = findViewById(R.id.textViewResendOtp)
         buttonVerifyOtp = findViewById(R.id.buttonVerifyOtp)
         progressBar = findViewById(R.id.progressVerifyOtp)
-
 
         verificationId = intent.getStringExtra("verificationId") ?: ""
 
@@ -69,23 +68,18 @@ class OtpVerificationActivity : AppCompatActivity() {
             verifyOtp()
         }
 
-        // Set the maximum length of the input field to 6 digits
         inputCode.filters = arrayOf(InputFilter.LengthFilter(6))
 
-        // Set up the paste listener for the EditText field
         inputCode.setOnLongClickListener {
-            // Capture paste event
             val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             val clipData: ClipData? = clipboard.primaryClip
             clipData?.let {
-                // Get the OTP from clipboard and set it to the EditText field
                 val otp = clipData.getItemAt(0).text.toString().trim()
                 inputCode.setText(otp)
             }
-            true // Indicate that we have consumed the event
+            true
         }
     }
-
     private fun startCountdown() {
         countDownTimer = object : CountDownTimer(resendCountdown, countdownInterval) {
             @SuppressLint("SetTextI18n")
@@ -94,11 +88,11 @@ class OtpVerificationActivity : AppCompatActivity() {
                 if (secondsUntilFinished == 0L) {
                     textViewResendOtp.visibility = View.VISIBLE
                     textViewResendOtp.text = "Resend OTP"
-                    textViewResendOtp.isEnabled = true // Enable the TextView to be clickable
+                    textViewResendOtp.isEnabled = true
                 } else {
                     textViewResendOtp.text = "Please Wait $secondsUntilFinished Seconds."
-                    textViewResendOtp.setTextColor(resources.getColor(android.R.color.holo_red_dark)) // Set text color to red
-                    textViewResendOtp.isEnabled = false // Disable the TextView during countdown
+                    textViewResendOtp.setTextColor(resources.getColor(android.R.color.holo_red_dark))
+                    textViewResendOtp.isEnabled = false
                 }
             }
 
@@ -106,18 +100,15 @@ class OtpVerificationActivity : AppCompatActivity() {
             override fun onFinish() {
                 textViewResendOtp.visibility = View.VISIBLE
                 textViewResendOtp.text = "Resend OTP"
-                textViewResendOtp.setTextColor(resources.getColor(android.R.color.holo_red_dark)) // Set text color to red
-                textViewResendOtp.isEnabled = true // Enable the TextView to be clickable
+                textViewResendOtp.setTextColor(resources.getColor(android.R.color.holo_red_dark))
+                textViewResendOtp.isEnabled = true
             }
         }
 
         countDownTimer.start()
     }
-
     private fun resendOtp() {
-        countDownTimer.cancel() // Cancel the existing countdown timer
-
-        // Retrieve the phone number from intent extras
+        countDownTimer.cancel()
         val phoneNumber = intent.getStringExtra("phoneNumber")
         phoneNumber?.let {
             val options = PhoneAuthOptions.newBuilder(auth)
@@ -127,10 +118,7 @@ class OtpVerificationActivity : AppCompatActivity() {
                 .setCallbacks(callbacks)
                 .build()
             PhoneAuthProvider.verifyPhoneNumber(options)
-
-            // Start the countdown timer again
             startCountdown()
-
             Toast.makeText(this, "Resending OTP...", Toast.LENGTH_SHORT).show()
         } ?: run {
             Toast.makeText(this, "Phone number not found.", Toast.LENGTH_SHORT).show()
@@ -152,9 +140,6 @@ class OtpVerificationActivity : AppCompatActivity() {
             Toast.makeText(this@OtpVerificationActivity, "OTP sent successfully.", Toast.LENGTH_SHORT).show()
         }
     }
-
-
-
     private fun verifyOtp() {
         val otp = inputCode.text.toString().trim()
 
@@ -165,7 +150,6 @@ class OtpVerificationActivity : AppCompatActivity() {
             Toast.makeText(this, "Please enter a valid 6-digit OTP", Toast.LENGTH_SHORT).show()
         }
     }
-
     private fun signInWithPhoneAuthCredential(credential: PhoneAuthCredential) {
         auth.signInWithCredential(credential)
             .addOnCompleteListener(this) { task ->
@@ -184,13 +168,10 @@ class OtpVerificationActivity : AppCompatActivity() {
                 }
             }
     }
-
     private fun saveUserLogin(userId: String, phoneNumber: String?) {
         val userLoginRef = FirebaseDatabase.getInstance().getReference("user_logins")
-            .child(userId) // Reference to the user_logins/userId node
-
-        val uniqueKey = userLoginRef.push().key // Generate a unique key
-
+            .child(userId)
+        val uniqueKey = userLoginRef.push().key
         val timestamp = System.currentTimeMillis()
         val month = getMonth(timestamp)
 
@@ -199,13 +180,9 @@ class OtpVerificationActivity : AppCompatActivity() {
             "userId" to userId,
             "timestamp" to timestamp
         )
-
-        // Set phoneNumber directly under the user_logins/userId node
         userLoginRef.child("phoneNumber").setValue(phoneNumber)
-
-        // Set other data under the generated unique key
         val uniqueKeyRef = userLoginRef.child(uniqueKey!!)
-        uniqueKeyRef.setValue(userLoginMap) // Set other data under the unique key
+        uniqueKeyRef.setValue(userLoginMap)
             .addOnCompleteListener { loginTask ->
                 if (loginTask.isSuccessful) {
                     Log.d(TAG, "User login event stored successfully")
@@ -214,13 +191,11 @@ class OtpVerificationActivity : AppCompatActivity() {
                 }
             }
     }
-
     private fun getMonth(timestamp: Long): Int {
         val calendar = Calendar.getInstance()
         calendar.timeInMillis = timestamp
         return calendar.get(Calendar.MONTH) + 1 // Months are 0-based, add 1 for readability
     }
-
     companion object {
         private const val TAG = "OtpVerificationActivity"
     }
